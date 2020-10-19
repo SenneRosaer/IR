@@ -33,7 +33,7 @@ import org.json.simple.JSONObject;
 import java.util.List;
 
 class Test {
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, ParseException {
         Analyzer analyzer = new StandardAnalyzer();
         Path indexPath = Paths.get("indexDirectory");
         Files.createDirectory(indexPath);
@@ -46,7 +46,7 @@ class Test {
             //https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
             File folder = new File("SplittedXML");
             File[] listof = folder.listFiles();
-
+            Integer test =0;
             for (File file : listof) {
                 String name = file.getName();
                 List<String> lines = Files.readAllLines(Paths.get("SplittedXML/"+ name));
@@ -55,15 +55,32 @@ class Test {
                 
                 for (String line : lines) {
                     JSONObject obj = (JSONObject) parser.parse(line);
-                    doc.add(new Field((String) obj.get("Id"), line, TextField.TYPE_STORED));
+                    doc.add(new Field("fieldname", line, TextField.TYPE_STORED));
                 }
                 iwriter.addDocument(doc);
+                test++;
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
         System.out.println(iwriter.getDirectory());
         iwriter.close();
+
+
+        //basic index search
+
+        DirectoryReader ireader = DirectoryReader.open(directory);
+        IndexSearcher isearcher = new IndexSearcher(ireader);
+
+        QueryParser qparser = new QueryParser("fieldname", analyzer);
+        Query query = qparser.parse("conversion from decimal");
+
+        ScoreDoc[] hits = isearcher.search(query, 10).scoreDocs;
+        
+        for (int i = 0; i < hits.length; i++){
+            Document hitdoc = isearcher.doc(hits[i].doc);
+            System.out.println(hitdoc.get("fieldname")+ "\n");
+        }
 
 
     }
