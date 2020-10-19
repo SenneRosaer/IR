@@ -35,7 +35,8 @@ import java.util.List;
 class Test {
     public static void main(String[] args) throws IOException {
         Analyzer analyzer = new StandardAnalyzer();
-        Path indexPath = Files.createTempDirectory("tempIndex");
+        Path indexPath = Paths.get("indexDirectory");
+        Files.createDirectory(indexPath);
         Directory directory = FSDirectory.open(indexPath);
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
         IndexWriter iwriter = new IndexWriter(directory, config);
@@ -61,6 +62,7 @@ class Test {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        System.out.println(iwriter.getDirectory());
         iwriter.close();
 
 
