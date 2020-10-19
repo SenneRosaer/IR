@@ -39,7 +39,7 @@ class Test {
 
         try {
 
-            File testfile = new File("Lucene/example.xml");
+            File testfile = new File("/home/senne/School/Master_AI_1/Posts.xml");
             SAXParserFactory factory = SAXParserFactory.newInstance();
             SAXParser parser = factory.newSAXParser();
             UserHandler userhandler = new UserHandler(iwriter);
