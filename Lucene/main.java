@@ -1,15 +1,17 @@
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.io.File;
 import javax.xml.parsers.SAXParserFactory;
 import javax.xml.parsers.SAXParser;
+import java.util.stream.*;
+
 
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.StringField;
 import org.apache.lucene.document.TextField;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexReader;
@@ -25,6 +27,11 @@ import org.apache.lucene.store.*;
 import org.apache.lucene.store.FSDirectory;
 import org.xml.sax.*;
 
+import org.json.simple.parser.*;
+import org.json.simple.JSONObject;
+
+import java.util.List;
+
 class Test {
     public static void main(String[] args) throws IOException {
         Analyzer analyzer = new StandardAnalyzer();
@@ -32,18 +39,25 @@ class Test {
         Directory directory = FSDirectory.open(indexPath);
         IndexWriterConfig config = new IndexWriterConfig(analyzer);
         IndexWriter iwriter = new IndexWriter(directory, config);
-        Document doc = new Document();
-        String text = "This is the text to be indexed.";
-        doc.add(new Field("fieldname", text, TextField.TYPE_STORED));
-        iwriter.addDocument(doc);
-
+        
+        JSONParser parser = new JSONParser();
         try {
+            //https://stackoverflow.com/questions/1844688/how-to-read-all-files-in-a-folder-from-java
+            File folder = new File("SplittedXML");
+            File[] listof = folder.listFiles();
 
-            File testfile = new File("/home/senne/School/Master_AI_1/Posts.xml");
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser parser = factory.newSAXParser();
-            UserHandler userhandler = new UserHandler(iwriter);
-            parser.parse(testfile, userhandler);
+            for (File file : listof) {
+                String name = file.getName();
+                List<String> lines = Files.readAllLines(Paths.get("SplittedXML/"+ name));
+
+                Document doc = new Document();
+                
+                for (String line : lines) {
+                    JSONObject obj = (JSONObject) parser.parse(line);
+                    doc.add(new Field((String) obj.get("Id"), line, TextField.TYPE_STORED));
+                }
+                iwriter.addDocument(doc);
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
