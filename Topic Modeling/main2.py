@@ -9,7 +9,7 @@ if __name__ == "__main__":
 
     # remove accents
     # https://stackoverflow.com/questions/37926248/how-to-remove-accents-from-values-in-columns
-    df.content = df.content.str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8')
+    df.content = df.content.str.normalize('NFKD').str.encode('ascii', errors='ignore').str.decode('utf-8').str.lower()
     print(df.content.head())
 
     # remove stop words
