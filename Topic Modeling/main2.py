@@ -2,6 +2,15 @@ import pandas as pd
 from nltk.corpus import stopwords
 import unidecode
 
+def compute_dict(input):
+    result = dict()
+    for word in input.split(' '):
+        if word in result:
+            result[word] += 1
+        else:
+            result[word] = 1
+    return result
+
 if __name__ == "__main__":
     df = pd.read_csv("news_dataset.csv")
     print(df.content.head())
@@ -23,3 +32,7 @@ if __name__ == "__main__":
     df['content'] = df['content'].str.replace(r'\s+', ' ')
 
     print(df.content.head())
+
+
+    df['content_dict'] = df['content'].apply(lambda content: compute_dict(content), axis=1)
+
